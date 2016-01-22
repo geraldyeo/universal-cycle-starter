@@ -31,7 +31,7 @@ const commonLoaders = [
 		loader: 'babel-loader',
 		query: {
 			cacheDirectory: true,
-			presets: babelrcObject.presets.concat('react-hmre'),
+			presets: babelrcObject.presets,
 			plugins: babelrcObject.plugins
 		}
 	}

@@ -1,6 +1,16 @@
 import path from 'path';
 import Express from 'express';
 import compression from 'compression';
+import { run } from '@cycle/core';
+import { makeHTMLDriver } from '@cycle/dom';
+import {Observable as $, ReplaySubject} from 'rx';
+
+import mvi from '../../app/mvi';
+
+// Cycle.run main function
+const main = ({ DOM }) => ({ DOM: mvi(DOM) });
+// create mock DOM driver
+const DOM = makeHTMLDriver();
 
 export default function configureServer (app, server, proxy, targetUrl) {
 	app.disable('x-powered-by');
@@ -21,7 +31,8 @@ export default function configureServer (app, server, proxy, targetUrl) {
 		proxy.ws(req, socket, head);
 	});
 
-	// added the error handling to avoid https://github.com/nodejitsu/node-http-proxy/issues/527
+	// added the error handling to avoid
+    // https://github.com/nodejitsu/node-http-proxy/issues/527
 	proxy.on('error', (error, req, res) => {
 		let json;
 		if (error.code !== 'ECONNRESET') {
@@ -40,6 +51,14 @@ export default function configureServer (app, server, proxy, targetUrl) {
 			webpackIsomorphicTools.refresh();
 		}
 
-		res.status(200).send('<!doctypehtml>');
+		const context$ = $.just({route: req.url});
+		const html$ = run(main, {
+			DOM,
+			context: () => context$
+		}).sources.DOM.map((html) => `<!doctype html>${html}`);
+		html$.subscribe(html => res.send(html));
+
+		// res.status(200).send('<!doctype html><html><body><div
+        // id="root"/></body></html>');
 	});
 }

@@ -1,9 +1,14 @@
-import React from 'react';
-import { render } from 'react-dom';
+import { run } from '@cycle/core';
+import { makeDOMDriver } from '@cycle/dom';
+import mvi from './mvi';
 
-const dest = document.getElementById('root');
+run(({ DOM }) => ({
+	DOM: mvi(DOM).skip(1)
+}), {
+	DOM: makeDOMDriver('#root')
+});
 
-render(
-	<div>Test</div>,
-	dest
-);
+if (__DEVELOPMENT__ && module.hot) {
+	// Enable Webpack hot module replacement for reducers
+	module.hot.accept();
+}
