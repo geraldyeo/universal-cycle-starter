@@ -1,6 +1,7 @@
 import { run } from '@cycle/core';
 import { makeDOMDriver } from '@cycle/dom';
-import mvi from './mvi';
+
+let mvi = require('./mvi').default;
 
 run(({ DOM }) => ({
 	DOM: mvi(DOM).skip(1)
@@ -9,6 +10,7 @@ run(({ DOM }) => ({
 });
 
 if (__DEVELOPMENT__ && module.hot) {
-	// Enable Webpack hot module replacement for reducers
-	module.hot.accept();
+	module.hot.accept('./mvi', () => {
+		mvi = require('./mvi').default;
+	});
 }

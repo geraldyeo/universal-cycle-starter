@@ -9,7 +9,7 @@ const webpackIsomorphicToolsPlugin = new WebpackIsomorphicToolsPlugin(webpackIso
 const assetsPath = path.resolve(__dirname, '../static/dist');
 const host = (process.env.HOST || 'localhost');
 const port = parseInt(process.env.PORT, 10) + 1 || 9001;
-const hotMiddlewareScript = 'webpack-hot-middleware/client?path=http://' + host + ':' + port + '/__webpack_hmr';
+const hotMiddlewareScript = 'webpack-hot-middleware/client?path=http://' + host + ':' + port + '/__webpack_hmr&timeout=20000&reload=true';
 
 const babelrc = fs.readFileSync('./.babelrc');
 let babelrcObject = {};

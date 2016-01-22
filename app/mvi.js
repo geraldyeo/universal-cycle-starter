@@ -14,7 +14,7 @@ const intent = DOM => ({
 
 const model = ({ height, weight }) => ({
 	height: height.startWith('177'),
-	weight: weight.startWith('65')
+	weight: weight.startWith('60')
 });
 
 const view = ({ height, weight }) =>

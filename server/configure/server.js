@@ -5,7 +5,7 @@ import { run } from '@cycle/core';
 import { makeHTMLDriver } from '@cycle/dom';
 import {Observable as $, ReplaySubject} from 'rx';
 
-import mvi from '../../app/mvi';
+let mvi = require('../../app/mvi').default;
 
 // Cycle.run main function
 const main = ({ DOM }) => ({ DOM: mvi(DOM) });
@@ -49,6 +49,12 @@ export default function configureServer (app, server, proxy, targetUrl) {
 	app.use((req, res) => {
 		if (__DEVELOPMENT__) {
 			webpackIsomorphicTools.refresh();
+
+			if (module.hot) {
+				module.hot.accept('../../app/mvi', () => {
+					mvi = require('../../app/mvi').default;
+				});
+			}
 		}
 
 		const context$ = $.just({route: req.url});
