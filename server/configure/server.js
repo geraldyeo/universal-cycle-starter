@@ -1,18 +1,18 @@
+import http from 'http';
 import path from 'path';
 import Express from 'express';
+import jade from 'jade';
 import compression from 'compression';
-import { run } from '@cycle/core';
-import { makeHTMLDriver } from '@cycle/dom';
-import {Observable as $, ReplaySubject} from 'rx';
+import serialize from 'serialize-javascript';
+import {run} from '@cycle/core';
+import {makeHTMLDriver} from '@cycle/dom';
+import {Observable as $} from 'rx';
 
-let mvi = require('../../app/mvi').default;
+import main from '../../app/app';
+//import mvi from '../../app/mvi';
+const template = jade.compileFile('./common/helpers/index.jade');
 
-// Cycle.run main function
-const main = ({ DOM }) => ({ DOM: mvi(DOM) });
-// create mock DOM driver
-const DOM = makeHTMLDriver();
-
-export default function configureServer (app, server, proxy, targetUrl) {
+export default function configureServer(app, server, proxy, targetUrl) {
 	app.disable('x-powered-by');
 
 	app.use(compression());
@@ -32,7 +32,7 @@ export default function configureServer (app, server, proxy, targetUrl) {
 	});
 
 	// added the error handling to avoid
-    // https://github.com/nodejitsu/node-http-proxy/issues/527
+	// https://github.com/nodejitsu/node-http-proxy/issues/527
 	proxy.on('error', (error, req, res) => {
 		let json;
 		if (error.code !== 'ECONNRESET') {
@@ -49,22 +49,10 @@ export default function configureServer (app, server, proxy, targetUrl) {
 	app.use((req, res) => {
 		if (__DEVELOPMENT__) {
 			webpackIsomorphicTools.refresh();
-
-			if (module.hot) {
-				module.hot.accept('../../app/mvi', () => {
-					mvi = require('../../app/mvi').default;
-				});
-			}
 		}
 
-		const context$ = $.just({route: req.url});
-		const html$ = run(main, {
-			DOM,
-			context: () => context$
-		}).sources.DOM.map((html) => `<!doctype html>${html}`);
+		const {sources} = run(main, {DOM: makeHTMLDriver()});
+		const html$ = sources.DOM.map(html => template({html, context: true, bundle: webpackIsomorphicTools.assets().javascript.main}));
 		html$.subscribe(html => res.send(html));
-
-		// res.status(200).send('<!doctype html><html><body><div
-        // id="root"/></body></html>');
 	});
 }

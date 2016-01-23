@@ -1,16 +1,17 @@
-import { run } from '@cycle/core';
-import { makeDOMDriver } from '@cycle/dom';
+import {run} from '@cycle/core';
+import {makeDOMDriver} from '@cycle/dom';
 
-let mvi = require('./mvi').default;
+import app from './app';
 
-run(({ DOM }) => ({
-	DOM: mvi(DOM).skip(1)
-}), {
+const {sinks, sources} = run(app, {
 	DOM: makeDOMDriver('#root')
 });
 
-if (__DEVELOPMENT__ && module.hot) {
-	module.hot.accept('./mvi', () => {
-		mvi = require('./mvi').default;
+if (module.hot) {
+	module.hot.accept();
+
+	module.hot.dispose(() => {
+		sinks.dispose();
+		sources.dispose();
 	});
 }
