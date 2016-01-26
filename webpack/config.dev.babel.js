@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import webpack from 'webpack';
+import NpmInstallPlugin from "npm-install-webpack-plugin";
 import WebpackIsomorphicToolsPlugin from 'webpack-isomorphic-tools/plugin';
 
 import webpackIsomorphicToolsConfig from './isomorphic-tools.config';
@@ -61,7 +62,8 @@ export default {
 			__PRODUCTION__: false,
 			__DEVELOPMENT__: true
 		}),
-		webpackIsomorphicToolsPlugin.development()
+		webpackIsomorphicToolsPlugin.development(),
+		new NpmInstallPlugin()
 	],
 	module: {
 		preLoaders: [
